@@ -10,6 +10,7 @@ die() { echo "Aborting: $*"; exit 1; }
 
 COURSIER=coursier
 if ! command -v $COURSIER > /dev/null 2>&1; then
+  # Or just tell the user to install Coursier, and link to https://get-coursier.io/
   COURSIER="$HOME/.coursier/coursier"
   if ! command -v $COURSIER > /dev/null 2>&1; then
     mkdir -p $(dirname "$COURSIER") || die "Failed to create $(dirname "$COURSIER")"
