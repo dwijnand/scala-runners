@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# A scala-specific veneer around coursier's app launching
+# Author: Dale Wijnand <dale.wijnand@gmail.com>
+# https://github.com/dwijnand/scala-veneer
+
+declare -r app_name=$(basename $0)
+
+declare scala_version=latest.stable
+
+declare verbose
+declare -a residual_args
+
+echoerr() { echo >&2 "$@"; }
+vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+die()     { echo "Aborting: $*" ; exit 1; }
+
+setScalaVersion() { scala_version="$1"; }
+
+addResidual() { vlog "[residual] arg = '$1'"  ; residual_args+=("$1"); }
+
+process_args() {
+  require_arg() {
+    local type="$1"
+    local opt="$2"
+    local arg="$3"
+
+    if [[ -z "$arg" ]] || [[ "${arg:0:1}" == "-" ]]; then
+      die "$opt requires <$type> argument"
+    fi
+  }
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
+                  -28) setScalaVersion "2.8+"  && shift ;;
+                  -29) setScalaVersion "2.9+"  && shift ;;
+                 -210) setScalaVersion "2.10+" && shift ;;
+                 -211) setScalaVersion "2.11+" && shift ;;
+                 -212) setScalaVersion "2.12+" && shift ;;
+                 -213) setScalaVersion "2.13+" && shift ;;
+                 -214) setScalaVersion "2.14+" && shift ;;
+                   -3) setScalaVersion "3+"    && shift ;;
+                    *) addResidual "$1"        && shift ;;
+    esac
+  done
+}
+
+process_args "$@"
+
+coursier launch "$app_name:$scala_version" -- "${residual_args[@]}"
