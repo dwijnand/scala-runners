@@ -38,8 +38,8 @@ process_args() {
                  -211) setScalaVersion "2.11+" && shift ;;
                  -212) setScalaVersion "2.12+" && shift ;;
                  -213) setScalaVersion "2.13+" && shift ;;
-                 -214) setScalaVersion "2.14+" && shift ;;
-                   -3) setScalaVersion "3+"    && shift ;;
+               # -214) setScalaVersion "2.14+" && shift ;;  # soon(tm)
+               #   -3) setScalaVersion "3+"    && shift ;;  # soon(tm)
                     *) addResidual "$1"        && shift ;;
     esac
   done
