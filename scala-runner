@@ -4,7 +4,8 @@
 # Author: Dale Wijnand <dale.wijnand@gmail.com>
 # https://github.com/dwijnand/scala-runners
 
-declare -r app_name=$(basename $0)
+app_name=$(basename "$0")
+declare -r app_name
 
 declare scala_version=latest.stable
 
