@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# A scala-specific veneer around coursier's app launching
+# A dynamic scala runner, using coursier's app launch capabilities.
 # Author: Dale Wijnand <dale.wijnand@gmail.com>
-# https://github.com/dwijnand/scala-veneer
+# https://github.com/dwijnand/scala-runners
 
 declare -r app_name=$(basename $0)
 
