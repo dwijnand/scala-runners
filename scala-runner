@@ -7,7 +7,7 @@
 app_name=$(basename "$0")
 
 declare -r app_name
-declare -g scala_version=latest.stable
+declare scala_version=latest.stable
 declare -a residual_args
 
 require_arg() {
