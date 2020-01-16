@@ -4,6 +4,8 @@ An alternative implementation of the Scala distribution's runners: `scala`, `sca
 (no `fsc`).  They are implemented as thin shell scripts around Coursier's `coursier launch` to add some Scala
 runners-specific (power) options.
 
+Install with `brew install --HEAD dwijnand/formulas/scala-runners`.
+
 ## Example Usages
 
 ### Open a Scala REPL
