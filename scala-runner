@@ -36,4 +36,4 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-coursier launch "$app_name:$scala_version" -- "${residual_args[@]}"
+cs launch "$app_name:$scala_version" -- "${residual_args[@]}"
