@@ -8,11 +8,17 @@ app_name=$(basename "$0")
 
 declare -r app_name
 declare scala_version=latest.stable
-declare -a residual_args
+declare -a java_args residual_args
 declare verbose
 
 echoerr() { echo >&2 "$@"; }
 vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+
+addJava()      {
+  vlog "[addJava] arg = '$1'"
+  java_args+=("-D")
+  java_args+=("${1:2}")
+}
 
 require_arg() {
   local type="$1"
@@ -37,7 +43,8 @@ while [[ $# -gt 0 ]]; do
                -213) scala_version="2.13+" && shift ;;
              # -214) scala_version="2.14+" && shift ;;  # soon(tm)
              #   -3) scala_version="3+"    && shift ;;  # soon(tm)
-                  *) residual_args+=("$1")   && shift ;;
+                -D*) addJava "$1"          && shift ;;
+                  *) residual_args+=("$1") && shift ;;
   esac
 done
 
@@ -60,4 +67,5 @@ execRunner() {
 }
 
 execRunner cs launch "$app_name:$scala_version" \
+  "${java_args[@]}" \
   -- "${residual_args[@]}"
