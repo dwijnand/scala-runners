@@ -26,10 +26,19 @@ addCoursier () {
   vlog "[addCoursier] arg = '$1'"
   coursier_args+=("$1")
 }
+getScalaNightly() {
+  . <(curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null)
+  echo "$nightly"
+}
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
-  scala_version="$1"
   case "$1" in
+    2.11.x) scala_version=$(getScalaNightly 2.11.x) ;;
+    2.12.x) scala_version=$(getScalaNightly 2.12.x) ;;
+    2.13.x) scala_version=$(getScalaNightly 2.13.x) ;;
+         *) scala_version="$1"
+  esac
+  case "$scala_version" in
     *-bin-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
     *-bin-*)         addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
   esac
@@ -50,15 +59,18 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
                  -v) verbose=true && shift ;;
     --scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
-                -28) scala_version="2.8+"  && shift ;;
-                -29) scala_version="2.9+"  && shift ;;
-               -210) scala_version="2.10+" && shift ;;
-               -211) scala_version="2.11+" && shift ;;
-               -212) scala_version="2.12+" && shift ;;
-               -213) scala_version="2.13+" && shift ;;
-                -C*) addCoursier "${1:2}"  && shift ;;
-                -D*) addJava "$1"          && shift ;;
-                  *) residual_args+=("$1") && shift ;;
+                -28) setScalaVersion "2.8+"   && shift ;;
+                -29) setScalaVersion "2.9+"   && shift ;;
+               -210) setScalaVersion "2.10+"  && shift ;;
+               -211) setScalaVersion "2.11+"  && shift ;;
+               -212) setScalaVersion "2.12+"  && shift ;;
+               -213) setScalaVersion "2.13+"  && shift ;;
+              -211x) setScalaVersion "2.11.x" && shift ;;
+              -212x) setScalaVersion "2.12.x" && shift ;;
+              -213x) setScalaVersion "2.13.x" && shift ;;
+                -C*) addCoursier "${1:2}"     && shift ;;
+                -D*) addJava "$1"             && shift ;;
+                  *) residual_args+=("$1")    && shift ;;
   esac
 done
 
