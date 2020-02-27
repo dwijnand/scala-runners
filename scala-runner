@@ -19,6 +19,10 @@ addJava()      {
   java_args+=("-D")
   java_args+=("${1:2}")
 }
+addCoursier () {
+  vlog "[addCoursier] arg = '$1'"
+  coursier_args+=("$1")
+}
 
 require_arg() {
   local type="$1"
@@ -41,8 +45,7 @@ while [[ $# -gt 0 ]]; do
                -211) scala_version="2.11+" && shift ;;
                -212) scala_version="2.12+" && shift ;;
                -213) scala_version="2.13+" && shift ;;
-             # -214) scala_version="2.14+" && shift ;;  # soon(tm)
-             #   -3) scala_version="3+"    && shift ;;  # soon(tm)
+                -C*) addCoursier "${1:2}"  && shift ;;
                 -D*) addJava "$1"          && shift ;;
                   *) residual_args+=("$1") && shift ;;
   esac
@@ -66,6 +69,8 @@ execRunner() {
   "$@"
 }
 
-execRunner cs launch "$app_name:$scala_version" \
+execRunner cs launch \
+  "$app_name:$scala_version" \
   "${java_args[@]}" \
+  "${coursier_args[@]}" \
   -- "${residual_args[@]}"
