@@ -31,7 +31,7 @@ getScalaNightly() {
   echo "$nightly"
 }
 setResolver() {
-  case "$scala_version" in
+  case "$1" in
     *-bin-*SNAPSHOT|*-pre-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
     *-bin-*|*-pre-*)                 addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
   esac
@@ -44,7 +44,7 @@ setScalaVersion() {
     2.13.x) scala_version=$(getScalaNightly 2.13.x) ;;
          *) scala_version="$1"
   esac
-  setResolver
+  setResolver "$scala_version"
 }
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
@@ -53,9 +53,9 @@ setScalaPrVersion() {
   local sha7=${sha:0:7}
   local base_version=$(curl -s -H "Accept: application/vnd.github.v3.raw" "https://api.github.com/repos/scala/scala/contents/build.sbt?ref=pull/$1/head" | grep -E '(baseVersion in Global|Global / baseVersion\b)' | sed 's/.*"\(.*\)".*/\1/')
   local cross="-bin"
-  (echo $base_version | grep -q -E '\d+\.\d+.0') && CROSS="-pre"
+  (echo $base_version | grep -q -E '\d+\.\d+.0') && cross="-pre"
   scala_version=$base_version$cross-$sha7-SNAPSHOT
-  setResolver
+  setResolver "$scala_version"
 }
 
 require_arg() {
