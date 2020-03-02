@@ -27,8 +27,7 @@ addCoursier () {
   coursier_args+=("$1")
 }
 getScalaNightly() {
-  local nightly=$(curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null | sed -n 's/nightly=\(.*\)/\1/p')
-  echo "$nightly"
+  curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null | sed -n 's/nightly=\(.*\)/\1/p'
 }
 setResolver() {
   case "$1" in
