@@ -9,7 +9,7 @@ app_name=$(basename "$0")
 declare -r app_name
 declare scala_version=latest.stable
 declare -a java_args residual_args
-declare verbose
+declare help verbose
 
 declare -r scala_ea_builds_url=https://scala-ci.typesafe.com/artifactory/scala-integration
 declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots
@@ -57,6 +57,39 @@ setScalaPrVersion() {
   setResolver "$scala_version"
 }
 
+usage() {
+  cat <<EOM
+Usage: \$script_name [options]
+
+Where, "script_name" is scala, scalac, scaladoc, or scalap.
+
+All options not specified below are passed through.
+
+  -h | -help         print this message (only when script_name is scala-runner)
+  -v                 verbose operation (this runner is chattier)
+
+  # scala version (default: latest.stable, resolved by Couriser)
+  -28                        use the latest 2.8.x release
+  -29                        use the latest 2.9.x release
+  -210                       use the latest 2.10.x release
+  -211                       use the latest 2.11.x release
+  -212                       use the latest 2.12.x release
+  -213                       use the latest 2.13.x release
+  -211x                      use the latest build from the 2.11.x branch
+  -212x                      use the latest build from the 2.12.x branch
+  -213x                      use the latest build from the 2.13.x branch
+  --scala-version <version>  use the specified version of scala
+  --scala-pr <PR number>     use the version of scala built from the specified PR
+
+  # passing options to the jvm
+  -Dkey=val         pass -Dkey=val directly to the jvm
+
+  # passing options to coursier
+  -C-X              pass option -X directly to coursier (-C is stripped)
+EOM
+  exit 0
+}
+
 require_arg() {
   local type="$1"
   local opt="$2"
@@ -70,6 +103,7 @@ require_arg() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+         -h | -help) [[ "$app_name" == "scala-runner" ]] && usage || residual_args+=("$1") && shift ;;
                  -v) verbose=true && shift ;;
     --scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
          --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
