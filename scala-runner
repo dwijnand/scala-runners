@@ -78,6 +78,7 @@ All options not specified below are passed through.
   -211x                      use the latest build from the 2.11.x branch
   -212x                      use the latest build from the 2.12.x branch
   -213x                      use the latest build from the 2.13.x branch
+  -<version>                 use the specified stable version of scala (\d.\d{1,2}.\d{1,2})
   --scala-version <version>  use the specified version of scala
   --scala-pr <PR number>     use the version of scala built from the specified PR
 
@@ -103,22 +104,26 @@ require_arg() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-         -h | -help) [[ "$app_name" == "scala-runner" ]] && usage || residual_args+=("$1") && shift ;;
-                 -v) verbose=true && shift ;;
-    --scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
-         --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
-                -28) setScalaVersion "2.8+"   && shift ;;
-                -29) setScalaVersion "2.9+"   && shift ;;
-               -210) setScalaVersion "2.10+"  && shift ;;
-               -211) setScalaVersion "2.11+"  && shift ;;
-               -212) setScalaVersion "2.12+"  && shift ;;
-               -213) setScalaVersion "2.13+"  && shift ;;
-              -211x) setScalaVersion "2.11.x" && shift ;;
-              -212x) setScalaVersion "2.12.x" && shift ;;
-              -213x) setScalaVersion "2.13.x" && shift ;;
-                -C*) addCoursier "${1:2}"     && shift ;;
-                -D*) addJava "$1"             && shift ;;
-                  *) residual_args+=("$1")    && shift ;;
+                      -h | -help) [[ "$app_name" == "scala-runner" ]] && usage || residual_args+=("$1") && shift ;;
+                              -v) verbose=true && shift ;;
+                 --scala-version) require_arg version "$1" "$2" && setScalaVersion "$2" && shift 2 ;;
+                      --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
+                             -28) setScalaVersion "2.8+"   && shift ;;
+                             -29) setScalaVersion "2.9+"   && shift ;;
+                            -210) setScalaVersion "2.10+"  && shift ;;
+                            -211) setScalaVersion "2.11+"  && shift ;;
+                            -212) setScalaVersion "2.12+"  && shift ;;
+                            -213) setScalaVersion "2.13+"  && shift ;;
+                           -211x) setScalaVersion "2.11.x" && shift ;;
+                           -212x) setScalaVersion "2.12.x" && shift ;;
+                           -213x) setScalaVersion "2.13.x" && shift ;;
+              -[0-9].[0-9].[0-9]) setScalaVersion "${1:1}" && shift ;; # x.y.z
+         -[0-9].[0-9].[0-9][0-9]) setScalaVersion "${1:1}" && shift ;; # x.y.zz
+         -[0-9].[0-9][0-9].[0-9]) setScalaVersion "${1:1}" && shift ;; # x.yy.z
+    -[0-9].[0-9][0-9].[0-9][0-9]) setScalaVersion "${1:1}" && shift ;; # x.yy.zz
+                             -C*) addCoursier "${1:2}"     && shift ;;
+                             -D*) addJava "$1"             && shift ;;
+                               *) residual_args+=("$1")    && shift ;;
   esac
 done
 
