@@ -34,16 +34,24 @@ getScalaBaseVersion() {
   local cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
   echo "$base_version$cross"
 }
-getScalaNightly() {
-  curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null | sed -n 's/nightly=\(.*\)/\1/p'
+getScalaHead() {
+  vlog "[getScalaHead] arg = '$1'"
+  local base_version=$(getScalaBaseVersion "heads/$1")
+  local refInfo=$(curl -s "https://api.github.com/repos/scala/scala/git/ref/heads/$1")
+  local sha=$(jq -r '.object.sha' <<< "$refInfo")
+  echo "$base_version-${sha:0:7}"
+}
+getScalaNext() {
+  vlog "[getScalaNext] arg = '$1'"
+  curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null \
+    | sed -n 's/nightly=\(.*\)/\1/p'
 }
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
-    2.11.x) scala_version=$(getScalaNightly 2.11.x) ;;
-    2.12.x) scala_version=$(getScalaNightly 2.12.x) ;;
-    2.13.x) scala_version=$(getScalaNightly 2.13.x) ;;
-         *) scala_version="$1"
+    +([0-9]).head) scala_version=$(getScalaHead "${1:0:-5}.x") ;;
+    +([0-9]).next) scala_version=$(getScalaNext "${1:0:-5}.x") ;;
+                *) scala_version="$1"
   esac
   case "$1" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
@@ -76,9 +84,10 @@ All options not specified below are passed through.
   -211                       use the latest 2.11.x release
   -212                       use the latest 2.12.x release
   -213                       use the latest 2.13.x release
-  -211x                      use the latest build from the 2.11.x branch
-  -212x                      use the latest build from the 2.12.x branch
-  -213x                      use the latest build from the 2.13.x branch
+  -2.12.next                 use the next candidate 2.12.x release (from the community build)
+  -2.13.next                 use the next candidate 2.13.x release
+  -2.12.head                 use the latest build from the HEAD of the 2.12.x branch (latest "merge-ly")
+  -2.13.head                 use the latest build from the HEAD of the 2.13.x branch
   -<version>                 use the specified scala version, e.g. -2.12.2 or -2.13.0-RC3
   --scala-version <version>  use the specified scala version, e.g. --scala-version 2.14-my-test
   --scala-pr <PR number>     use the version of scala built from the specified PR
@@ -113,9 +122,7 @@ while [[ $# -gt 0 ]]; do
                             -211) setScalaVersion "2.11+"  && shift ;;
                             -212) setScalaVersion "2.12+"  && shift ;;
                             -213) setScalaVersion "2.13+"  && shift ;;
-                           -211x) setScalaVersion "2.11.x" && shift ;;
-                           -212x) setScalaVersion "2.12.x" && shift ;;
-                           -213x) setScalaVersion "2.13.x" && shift ;;
+          -2.1[2-4].@(head|next)) setScalaVersion "${1:1}" && shift ;; # 2.1[2-4].head or 2.1[2-4].next
      -2.@([89]|1[0-4]).+([0-9])*) setScalaVersion "${1:1}" && shift ;; # 2.[89].z* or 2.1[0-4].z*
                  --scala-version) require_arg version     "$1" "$2" && setScalaVersion   "$2" && shift 2 ;;
                       --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
