@@ -49,9 +49,9 @@ getScalaNext() {
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
-    +([0-9]).head) scala_version=$(getScalaHead "${1:0:-5}.x") ;;
-    +([0-9]).next) scala_version=$(getScalaNext "${1:0:-5}.x") ;;
-                *) scala_version="$1"
+    *.head) scala_version=$(getScalaHead "${1:0:-5}.x") ;;
+    *.next) scala_version=$(getScalaNext "${1:0:-5}.x") ;;
+         *) scala_version="$1"
   esac
   case "$1" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
