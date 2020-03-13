@@ -29,12 +29,6 @@ addCoursier () {
 getScalaNightly() {
   curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null | sed -n 's/nightly=\(.*\)/\1/p'
 }
-setResolver() {
-  case "$1" in
-    *-bin-*SNAPSHOT|*-pre-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
-    *-bin-*|*-pre-*)                 addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
-  esac
-}
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
@@ -43,7 +37,10 @@ setScalaVersion() {
     2.13.x) scala_version=$(getScalaNightly 2.13.x) ;;
          *) scala_version="$1"
   esac
-  setResolver "$scala_version"
+  case "$1" in
+    *-bin-*SNAPSHOT|*-pre-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
+    *-bin-*|*-pre-*)                 addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
+  esac
 }
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
@@ -53,8 +50,7 @@ setScalaPrVersion() {
   local base_version=$(curl -s -H "Accept: application/vnd.github.v3.raw" "https://api.github.com/repos/scala/scala/contents/build.sbt?ref=pull/$1/head" | grep -E '(baseVersion in Global|Global / baseVersion\b)' | sed 's/.*"\(.*\)".*/\1/')
   local cross="-bin"
   (echo $base_version | grep -q -E '\d+\.\d+.0') && cross="-pre"
-  scala_version=$base_version$cross-$sha7-SNAPSHOT
-  setResolver "$scala_version"
+  setScalaVersion "$base_version$cross-$sha7-SNAPSHOT"
 }
 
 usage() {
