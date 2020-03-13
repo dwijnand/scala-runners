@@ -53,7 +53,7 @@ setScalaVersion() {
     *.next) scala_version=$(getScalaNext "${1:0:-5}.x") ;;
          *) scala_version="$1"
   esac
-  case "$1" in
+  case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
     *-@(bin|pre)-*)         addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
   esac
