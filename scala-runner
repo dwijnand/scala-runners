@@ -30,20 +30,20 @@ addCoursier () {
 }
 getScalaBaseVersion() {
   vlog "[getScalaBaseVersion] arg = '$1'"
-  local base_version=$(curl -s -H "Accept: application/vnd.github.v3.raw" "https://api.github.com/repos/scala/scala/contents/build.sbt?ref=$1" | grep -E '(baseVersion in Global|Global / baseVersion\b)' | sed 's/.*"\(.*\)".*/\1/')
+  local base_version=$(curl -Ls "https://raw.github.com/scala/scala/$1/build.sbt" | grep -E '(baseVersion in Global|Global / baseVersion\b)' | sed 's/.*"\(.*\)".*/\1/')
   local cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
   echo "$base_version$cross"
 }
 getScalaHead() {
   vlog "[getScalaHead] arg = '$1'"
   local base_version=$(getScalaBaseVersion "heads/$1")
-  local refInfo=$(curl -s "https://api.github.com/repos/scala/scala/git/ref/heads/$1")
+  local refInfo=$(hub api "repos/scala/scala/git/ref/heads/$1")
   local sha=$(jq -r '.object.sha' <<< "$refInfo")
   echo "$base_version-${sha:0:7}"
 }
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
-  curl https://raw.githubusercontent.com/scala/community-builds/"$1"/nightly.properties 2>/dev/null \
+  curl -Ls "https://raw.github.com/scala/community-builds/$1/nightly.properties" \
     | sed -n 's/nightly=\(.*\)/\1/p'
 }
 setScalaVersion() {
@@ -61,7 +61,7 @@ setScalaVersion() {
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
   local base_version=$(getScalaBaseVersion "pull/$1/head")
-  local prInfo=$(curl -s https://api.github.com/repos/scala/scala/pulls/$1)
+  local prInfo=$(hub api "repos/scala/scala/pulls/$1")
   local sha=$(jq -r '.head.sha' <<< "$prInfo")
   setScalaVersion "$base_version-${sha:0:7}-SNAPSHOT"
 }
