@@ -18,6 +18,7 @@ declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-p
 
 echoerr() { echo >&2 "$@"; }
 vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
+dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 ${1:0:-5} (bash 4.2+)
 
 addJava()      {
   vlog "[addJava] arg = '$1'"
@@ -49,8 +50,8 @@ getScalaNext() {
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
-    *.head) scala_version=$(getScalaHead "${1:0:-5}.x") ;;
-    *.next) scala_version=$(getScalaNext "${1:0:-5}.x") ;;
+    *.head) scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
+    *.next) scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
          *) scala_version="$1"
   esac
   case "$scala_version" in
