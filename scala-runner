@@ -43,7 +43,7 @@ getScalaHead() {
 }
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
-  curl -Ls "https://raw.github.com/scala/community-builds/$1/nightly.properties" \
+  curl -Ls "https://raw.github.com/scala/community-build/$1/nightly.properties" \
     | sed -n 's/nightly=\(.*\)/\1/p'
 }
 setScalaVersion() {
