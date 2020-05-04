@@ -15,7 +15,7 @@ $ scala
 Welcome to Scala 2.13.0 (OpenJDK GraalVM CE 19.0.0, Java 1.8.0_212).
 Type in expressions for evaluation. Or try :help.
 
-scala> :quit
+scala>
 ```
 
 ### Run any basic Scala command-line tool
@@ -45,6 +45,18 @@ Scala compiler version 2.10.7 -- Copyright 2002-2017, LAMP/EPFL
 
 $ scalac --scala-version 2.10.4 -version
 Scala compiler version 2.10.4 -- Copyright 2002-2013, LAMP/EPFL
+```
+
+### Add a dependency in the REPL
+
+```bash
+$ scala -Ccom.lihaoyi::fastparse:2.2.2
+Welcome to Scala 2.13.2 (Java HotSpot(TM) 64-Bit GraalVM EE 19.2.1, Java 1.8.0_231).
+Type in expressions for evaluation. Or try :help.
+
+scala> import fastparse._, NoWhitespace._
+import fastparse._
+import NoWhitespace._
 ```
 
 ### Pass runner specific options
