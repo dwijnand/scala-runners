@@ -22,8 +22,8 @@ dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 $
 
 addJava()      {
   vlog "[addJava] arg = '$1'"
-  java_args+=("-D")
-  java_args+=("${1:2}")
+  java_args+=("-J")
+  java_args+=("$1")
 }
 addCoursier () {
   vlog "[addCoursier] arg = '$1'"
@@ -95,6 +95,7 @@ All options not specified below are passed through.
 
   # passing options to the jvm
   -Dkey=val         pass -Dkey=val directly to the jvm
+  -J-X              pass option -X directly to the jvm
 
   # passing options to coursier
   -C-X              pass option -X directly to coursier (-C is stripped)
@@ -129,6 +130,7 @@ while [[ $# -gt 0 ]]; do
                       --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
                              -C*) addCoursier "${1:2}"     && shift ;;
                              -D*) addJava "$1"             && shift ;;
+                             -J*) addJava "${1:2}"         && shift ;;
                                *) residual_args+=("$1")    && shift ;;
   esac
 done
