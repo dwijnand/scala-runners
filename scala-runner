@@ -11,7 +11,7 @@ app_name=$(basename "$0")
 declare -r app_name
 declare scala_version=latest.stable
 declare -a java_args residual_args
-declare help verbose
+declare verbose
 
 declare -r scala_ea_builds_url=https://scala-ci.typesafe.com/artifactory/scala-integration
 declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots
@@ -19,6 +19,13 @@ declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-p
 echoerr() { echo >&2 "$@"; }
 vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 ${1:0:-5} (bash 4.2+)
+
+checkHub() {
+  if [ ! -f "${HOME}/.config/hub" ]; then
+    echo "No hub config found (at ~/.config/hub).  Triggering hub to prompt you for credentials."
+    hub api
+  fi
+}
 
 addJava()      {
   vlog "[addJava] arg = '$1'"
@@ -50,9 +57,9 @@ getScalaNext() {
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
-    *.head) scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
-    *.next) scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
-         *) scala_version="$1"
+    *.head) checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
+    *.next) checkHub; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
+         *)           scala_version="$1"
   esac
   case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
@@ -61,6 +68,7 @@ setScalaVersion() {
 }
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
+  checkHub
   local base_version=$(getScalaBaseVersion "pull/$1/head")
   local prInfo=$(hub api "repos/scala/scala/pulls/$1")
   local sha=$(jq -r '.head.sha' <<< "$prInfo")
