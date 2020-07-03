@@ -64,6 +64,7 @@ setScalaVersion() {
   case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
     *-@(bin|pre)-*)         addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
+    *+)                     addCoursier "--no-default" && addCoursier "-r=central" ;;
   esac
 }
 setScalaPrVersion() {
