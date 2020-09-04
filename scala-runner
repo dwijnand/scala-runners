@@ -67,6 +67,7 @@ setScalaVersion() {
     *.next) checkHub; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
          *)           scala_version="$1"
   esac
+  [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
   case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r" && addCoursier "$scala_pr_builds_url" ;;
     *-@(bin|pre)-*)         addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
