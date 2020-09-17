@@ -73,6 +73,10 @@ setScalaVersion() {
     *-@(bin|pre)-*)         addCoursier "-r" && addCoursier "$scala_ea_builds_url" ;;
     *+)                     addCoursier "--no-default" && addCoursier "-r=central" ;;
   esac
+  case "$scala_version" in
+    *-SNAPSHOT) addCoursier "--ttl=24h" ;;
+    *+)         addCoursier "--ttl=24h" ;;
+  esac
 }
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
