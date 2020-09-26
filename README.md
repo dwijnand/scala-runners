@@ -108,7 +108,7 @@ Welcome to Scala 2.13.3-bin-560e1c9 (OpenJDK 64-Bit Server VM, Java 1.8.0_252).
 [...]
 ```
 
-Or for the most recent nightly, period:
+Or for the most recent nightly (the HEAD of the 2.13.x branch):
 
 ```bash
 $ scala -2.13.head
@@ -126,3 +126,15 @@ Type in expressions for evaluation. Or try :help.
 
 In this example, 8960 is the number of a pull request in the [scala/scala repo](https://github.com/scala/scala/pulls) and  `82445f1` is the SHA of the last commit in the PR.
 
+### Getting the resolved Scala version
+
+```bash
+$ scala --print-scala-version
+2.13.3
+$ scala -212 --print-scala-version
+2.12.12
+$ scala -2.12.head --print-scala-version
+2.12.13-bin-c30130b
+$ scala --scala-pr 8936 --print-scala-version
+2.12.12-bin-2424146-SNAPSHOT
+```

@@ -11,7 +11,7 @@ app_name=$(basename "$0")
 declare -r app_name
 declare scala_version=latest.stable
 declare -a java_args residual_args
-declare verbose
+declare verbose print_scala_version
 
 declare -r scala_ea_builds_url=https://scala-ci.typesafe.com/artifactory/scala-integration
 declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots
@@ -60,14 +60,7 @@ getScalaNext() {
   curl -Ls "https://raw.github.com/scala/community-build/$1/nightly.properties" \
     | sed -n 's/nightly=\(.*\)/\1/p'
 }
-setScalaVersion() {
-  vlog "[setScalaVersion] arg = '$1'"
-  case "$1" in
-    *.head) checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
-    *.next) checkHub; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
-         *)           scala_version="$1"
-  esac
-  [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
+setCoursierOptionsForSv() {
   case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r=$scala_pr_builds_url" ;;
     *-@(bin|pre)-*)         addCoursier "-r=$scala_ea_builds_url" ;;
@@ -77,6 +70,16 @@ setScalaVersion() {
     *-SNAPSHOT) addCoursier "--ttl=24h" ;;
     *+)         addCoursier "--ttl=24h" ;;
   esac
+}
+setScalaVersion() {
+  vlog "[setScalaVersion] arg = '$1'"
+  case "$1" in
+    *.head) checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
+    *.next) checkHub; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
+         *)           scala_version="$1"
+  esac
+  [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
+  setCoursierOptionsForSv
 }
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
@@ -121,6 +124,8 @@ All options not specified below are passed through.
 
   # passing options to coursier
   -C-X              pass option -X directly to coursier (-C is stripped)
+
+  --print-scala-version      prints the resolved scala version
 EOM
   exit 0
 }
@@ -153,6 +158,7 @@ while [[ $# -gt 0 ]]; do
                              -C*) addCoursier "${1:2}"     && shift ;;
                              -D*) addJava "$1"             && shift ;;
                              -J*) addJava "${1:2}"         && shift ;;
+           --print-scala-version) print_scala_version=1    && shift ;;
                                *) residual_args+=("$1")    && shift ;;
   esac
 done
@@ -174,6 +180,20 @@ execRunner() {
 
   "$@"
 }
+
+if [[ -n "$print_scala_version" ]]; then
+  case "$scala_version" in
+    *.*.*)
+      sv="$scala_version" ;;
+    *)
+      json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
+      execRunner cs fetch  -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" 2>&1 >/dev/null
+      sv=$(jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3)
+      ;;
+  esac
+  echo "$sv"
+  exit
+fi
 
 execRunner cs launch \
   "$app_name:$scala_version" \
