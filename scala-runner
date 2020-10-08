@@ -30,7 +30,7 @@ checkHub() {
 
 addJava()      {
   vlog "[addJava] arg = '$1'"
-  java_args+=("-J")
+  java_args+=("--java-opt")
   java_args+=("$1")
 }
 addCoursier () {
