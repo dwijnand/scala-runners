@@ -187,7 +187,7 @@ if [[ -n "$print_scala_version" ]]; then
       sv="$scala_version" ;;
     *)
       json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
-      execRunner cs fetch  -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" /dev/null 2>&1
+      execRunner cs fetch  -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" >/dev/null 2>&1
       sv=$(jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3)
       ;;
   esac
