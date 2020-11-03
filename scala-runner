@@ -28,6 +28,10 @@ checkHub() {
   fi
 }
 
+checkCurl() {
+  command -v curl &> /dev/null || die "curl command required"  
+}
+
 addJava()      {
   vlog "[addJava] arg = '$1'"
   java_args+=("--java-opt")
@@ -75,7 +79,7 @@ setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
     *.head) checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
-    *.next) checkHub; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
+    *.next) checkCurl; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
          *)           scala_version="$1"
   esac
   [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
