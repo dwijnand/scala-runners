@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPTS_DIR/../.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
 
 abort() {
   >&2 printf "$*" && exit 1
