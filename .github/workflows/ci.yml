@@ -1,0 +1,14 @@
+name: CI
+on: push
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v2
+    - name: Install bats
+      run: |
+        bash ./scripts/install_bats.bash
+    - name: Run test 
+      run: |
+        ./bats-0.4.0/bin/bats ./test
+
