@@ -36,6 +36,10 @@ checkCoursier() {
   command -v cs &> /dev/null || die "cs command required"
 }
 
+checkJq() {
+  command -v jq &> /dev/null || die "jq command required"
+}
+
 addJava()      {
   vlog "[addJava] arg = '$1'"
   java_args+=("--java-opt")
@@ -82,7 +86,7 @@ setCoursierOptionsForSv() {
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
-    *.head) checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
+    *.head) checkJq && checkHub; scala_version=$(getScalaHead "$(dropR "$1" 5).x") ;;
     *.next) checkCurl; scala_version=$(getScalaNext "$(dropR "$1" 5).x") ;;
          *)           scala_version="$1"
   esac
@@ -92,7 +96,7 @@ setScalaVersion() {
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
   local base_version
-  checkHub
+  checkJq && checkHub
   base_version=$(getScalaBaseVersion "pull/$1/head")
   [ $? -ne 0 ] && die "Failed to get scala base version for PR $1"
   local prInfo=$(hub api "repos/scala/scala/pulls/$1")
@@ -196,6 +200,7 @@ if [[ -n "$print_scala_version" ]]; then
     *.*.*)
       sv="$scala_version" ;;
     *)
+      checkJq
       json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
       execRunner cs fetch  -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" >/dev/null 2>&1
       sv=$(jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3)
