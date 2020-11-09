@@ -32,6 +32,10 @@ checkCurl() {
   command -v curl &> /dev/null || die "curl command required"  
 }
 
+checkCoursier() {
+  command -v cs &> /dev/null || die "cs command required"
+}
+
 addJava()      {
   vlog "[addJava] arg = '$1'"
   java_args+=("--java-opt")
@@ -184,6 +188,8 @@ execRunner() {
 
   "$@"
 }
+
+checkCoursier
 
 if [[ -n "$print_scala_version" ]]; then
   case "$scala_version" in
