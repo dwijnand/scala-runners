@@ -22,6 +22,7 @@ die()     { echo "Aborting: $*"; exit 1; }
 dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 ${1:0:-5} (bash 4.2+)
 
 checkHub() {
+  command -v hub &> /dev/null || die "hub command required"  
   if [ ! -f "${HOME}/.config/hub" ]; then
     echo "No hub config found (at ~/.config/hub).  Triggering hub to prompt you for credentials."
     hub api
