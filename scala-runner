@@ -21,35 +21,20 @@ vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
 die()     { echo "Aborting: $*"; exit 1; }
 dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 ${1:0:-5} (bash 4.2+)
 
-checkHub() {
-  command -v hub &> /dev/null || die "hub command required"  
+checkCurl() { command -v curl &> /dev/null || die "curl command required"; }
+checkCs()   { command -v cs   &> /dev/null || die "cs command required";   }
+checkJq()   { command -v jq   &> /dev/null || die "jq command required";   }
+checkHub()  {
+  command -v hub &> /dev/null || die "hub command required"
   if [ ! -f "${HOME}/.config/hub" ]; then
     echo "No hub config found (at ~/.config/hub).  Triggering hub to prompt you for credentials."
     hub api
   fi
 }
 
-checkCurl() {
-  command -v curl &> /dev/null || die "curl command required"  
-}
+addJava()     { vlog "[addJava] arg = '$1'";         java_args+=("--java-opt" "$1"); }
+addCoursier() { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1");              }
 
-checkCoursier() {
-  command -v cs &> /dev/null || die "cs command required"
-}
-
-checkJq() {
-  command -v jq &> /dev/null || die "jq command required"
-}
-
-addJava()      {
-  vlog "[addJava] arg = '$1'"
-  java_args+=("--java-opt")
-  java_args+=("$1")
-}
-addCoursier () {
-  vlog "[addCoursier] arg = '$1'"
-  coursier_args+=("$1")
-}
 getScalaBaseVersion() {
   vlog "[getScalaBaseVersion] arg = '$1'"
   local build_sbt
@@ -59,6 +44,7 @@ getScalaBaseVersion() {
   local cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
   echo "$base_version$cross"
 }
+
 getScalaHead() {
   vlog "[getScalaHead] arg = '$1'"
   local base_version
@@ -68,11 +54,13 @@ getScalaHead() {
   local sha=$(jq -r '.object.sha' <<< "$refInfo")
   echo "$base_version-${sha:0:7}"
 }
+
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
   curl -Ls "https://raw.github.com/scala/community-build/$1/nightly.properties" \
     | sed -n 's/nightly=\(.*\)/\1/p'
 }
+
 setCoursierOptionsForSv() {
   case "$scala_version" in
     *-@(bin|pre)-*SNAPSHOT) addCoursier "-r=$scala_pr_builds_url" ;;
@@ -84,6 +72,7 @@ setCoursierOptionsForSv() {
     *+)         addCoursier "--ttl=24h" ;;
   esac
 }
+
 setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   case "$1" in
@@ -94,6 +83,7 @@ setScalaVersion() {
   [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
   setCoursierOptionsForSv
 }
+
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
   local base_version
@@ -194,7 +184,7 @@ execRunner() {
   "$@"
 }
 
-checkCoursier
+checkCs
 
 if [[ -n "$print_scala_version" ]]; then
   case "$scala_version" in
