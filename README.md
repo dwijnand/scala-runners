@@ -4,10 +4,12 @@ Replaces the Scala distribution's runners: `scala`, `scalac`, `scaladoc`, and `s
 
 These runners add highly convenient options, most notably:
 
-* easily run any Scala version
-* easily add dependencies
+* easily run any Scala version (e.g. `scalac -212`)
+* easily add dependencies (e.g. `scala -Ccom.lihaoyi::fastparse:2.2.2`)
 
-The runners are implemented as thin shell scripts around Coursier's `coursier launch`.
+See `scala-runner -help` for the usage text (using `scala -help` will give you Scala's help usage text).
+
+The runners are implemented as thin shell scripts around Coursier's `cs launch`.
 
 ## Install/Upgrade
 
@@ -56,6 +58,9 @@ Scala compiler version 2.10.7 -- Copyright 2002-2017, LAMP/EPFL
 
 $ scalac --scala-version 2.10.4 -version
 Scala compiler version 2.10.4 -- Copyright 2002-2013, LAMP/EPFL
+
+$ scalac -2.12.2 -version
+Scala compiler version 2.12.2 -- Copyright 2002-2017, LAMP/EPFL and Lightbend, Inc.
 ```
 
 ### Add a dependency in the REPL
