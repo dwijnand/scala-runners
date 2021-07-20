@@ -25,8 +25,10 @@ All options not specified below are passed through.
   -2.13.next                 use the next candidate 2.13.x release
   -2.12.head                 use the latest build from the HEAD of the 2.12.x branch (latest "merge-ly")
   -2.13.head                 use the latest build from the HEAD of the 2.13.x branch
-  -<version>                 use the specified scala version, e.g. -2.12.2 or -2.13.0-RC3
-  --scala-version <version>  use the specified scala version, e.g. --scala-version 2.14-my-test
+  -3                         use the latest 3.x release
+  -3.head                    use the latest 3.x nightly release
+  -<version>                 use the specified scala version, e.g. -2.13.6 or -3.0.1
+  --scala-version <version>  use the specified scala version, e.g. --scala-version 3.1-my-test
   --scala-pr <PR number>     use the version of scala built from the specified PR
 
   # passing options to the jvm
