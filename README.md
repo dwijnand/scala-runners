@@ -17,6 +17,15 @@ Install with `brew install --HEAD dwijnand/formulas/scala-runners`.
 
 Upgrade with `brew upgrade --fetch-HEAD dwijnand/formulas/scala-runners`.
 
+***Fix after master->main branch rename:***
+
+```bash
+brew update
+brew uninstall scala-runners
+rm -fr ~/Library/Caches/Homebrew/scala-runners--git/
+brew install --HEAD scala-runners
+```
+
 ## Example Usages
 
 ### Open a Scala REPL
