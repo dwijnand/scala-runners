@@ -77,7 +77,10 @@ setCoursierOptionsForSv() {
 setOptionsForSv() {
   setCoursierOptionsForSv
   if [[ -n "$scala3" ]]; then
-    app_name="scala3-compiler"
+    case "$app_name" in
+      scalac) app_name="scala3-compiler" ;;
+       scala) app_name="scala3-repl"     ;;
+    esac
   fi
 }
 
