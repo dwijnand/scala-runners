@@ -133,8 +133,8 @@ All options not specified below are passed through.
   -2.13.head                 use the latest build from the HEAD of the 2.13.x branch
   -3                         use the latest 3.x release
   -3.head                    use the latest 3.x nightly release
-  -<version>                 use the specified scala version, e.g. -2.12.2 or -2.13.0-RC3
-  --scala-version <version>  use the specified scala version, e.g. --scala-version 2.14-my-test
+  -<version>                 use the specified scala version, e.g. -2.13.6 or -3.0.1
+  --scala-version <version>  use the specified scala version, e.g. --scala-version 3.1-my-test
   --scala-pr <PR number>     use the version of scala built from the specified PR
 
   # passing options to the jvm
@@ -175,6 +175,7 @@ while [[ $# -gt 0 ]]; do
                               -3) scala3=true && setOptionsForSv && shift ;;
                          -3.head) setScalaVersion "3+"     && shift ;;
                        # -3.next)  && shift ;;
+                             -3*) setScalaVersion "${1:1}" && shift ;;
                  --scala-version) require_arg version     "$1" "$2" && setScalaVersion   "$2" && shift 2 ;;
                       --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
                              -C*) addCoursier "${1:2}"     && shift ;;
