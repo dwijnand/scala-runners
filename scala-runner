@@ -92,6 +92,9 @@ setScalaVersion() {
          *)           scala_version="$1"
   esac
   [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
+  case "$scala_version" in
+    3*) scala3=true ;;
+  esac
   setOptionsForSv
 }
 
@@ -129,6 +132,7 @@ All options not specified below are passed through.
   -2.12.head                 use the latest build from the HEAD of the 2.12.x branch (latest "merge-ly")
   -2.13.head                 use the latest build from the HEAD of the 2.13.x branch
   -3                         use the latest 3.x release
+  -3.head                    use the latest 3.x nightly release
   -<version>                 use the specified scala version, e.g. -2.12.2 or -2.13.0-RC3
   --scala-version <version>  use the specified scala version, e.g. --scala-version 2.14-my-test
   --scala-pr <PR number>     use the version of scala built from the specified PR
@@ -169,7 +173,7 @@ while [[ $# -gt 0 ]]; do
           -2.1[2-4].@(head|next)) setScalaVersion "${1:1}" && shift ;; # 2.1[2-4].head or 2.1[2-4].next
      -2.@([89]|1[0-4]).+([0-9])*) setScalaVersion "${1:1}" && shift ;; # 2.[89].z* or 2.1[0-4].z*
                               -3) scala3=true && setOptionsForSv && shift ;;
-                       # -3.head)  && shift ;;
+                         -3.head) setScalaVersion "3+"     && shift ;;
                        # -3.next)  && shift ;;
                  --scala-version) require_arg version     "$1" "$2" && setScalaVersion   "$2" && shift 2 ;;
                       --scala-pr) require_arg "PR number" "$1" "$2" && setScalaPrVersion "$2" && shift 2 ;;
