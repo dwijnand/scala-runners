@@ -65,11 +65,7 @@ getScalaNext() {
     # * releases are ordered such that latest RC comes last;
     #   this assumption breaks if e.g. the Scala 3 team releases 3.0.6 after 3.1.0-RC1;
     #   which is a plausible scenario, but maybe not worth accounting for? shrug, for now
-    # * release candidates are NOT marked as "prelease"; if they were
-    #   then release/latest would ignore them. the Scala 3 team really ought
-    #   to be marking them as prereleases, but as long as they aren't,
-    #   we'll rely on the behavior
-    hub api "repos/lampepfl/dotty/releases/latest" | jq -r .tag_name
+    hub api "repos/lampepfl/dotty/releases?per_page=1" | jq -r .[0].tag_name
   else
     curl -Ls "https://raw.github.com/scala/community-build/$1/nightly.properties" \
       | sed -n 's/nightly=\(.*\)/\1/p'
