@@ -21,12 +21,12 @@ All options not specified below are passed through.
   -211                       use the latest 2.11.x release
   -212                       use the latest 2.12.x release
   -213                       use the latest 2.13.x release
-  -2.12.next                 use the next candidate 2.12.x release (from the community build)
-  -2.13.next                 use the next candidate 2.13.x release
-  -2.12.head                 use the latest build from the HEAD of the 2.12.x branch (latest "merge-ly")
-  -2.13.head                 use the latest build from the HEAD of the 2.13.x branch
   -3                         use the latest 3.x release
+  -2.12.next                 use the latest 2.12.x release candidate (from the community build)
+  -2.13.next                 use the latest 2.13.x release candidate
   -3.next                    use the latest 3.x release candidate
+  -2.12.head                 use the latest 2.12.x branch HEAD build (latest "merge-ly")
+  -2.13.head                 use the latest 2.13.x branch HEAD build
   -3.head                    use the latest 3.x nightly release
   -<version>                 use the specified scala version, e.g. -2.13.6 or -3.0.1
   --scala-version <version>  use the specified scala version, e.g. --scala-version 3.1-my-test
