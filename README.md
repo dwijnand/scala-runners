@@ -13,6 +13,8 @@ The runners are implemented as thin shell scripts around Coursier's `cs launch`.
 
 ## Install/Upgrade
 
+### Homebrew
+
 Install with `brew install --HEAD dwijnand/formulas/scala-runners`.
 
 Upgrade with `brew upgrade --fetch-HEAD dwijnand/formulas/scala-runners`.
@@ -25,6 +27,16 @@ brew uninstall scala-runners
 rm -fr ~/Library/Caches/Homebrew/scala-runners--git/
 brew install --HEAD scala-runners
 ```
+
+### Fallback
+
+You may also use this oneliner to get the scala-runners in your current directory:
+
+```bash
+curl -sSLO https://github.com/dwijnand/scala-runners/archive/refs/heads/main.zip && unzip main.zip scala-runners-main/scala* && mv scala-runners-main/scala* . && rm -r scala-runners-main main.zip
+```
+
+Then you can run them as `./scala ...` or move them into your `PATH`.
 
 ## Example Usages
 
