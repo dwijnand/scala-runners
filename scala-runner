@@ -63,6 +63,7 @@ getScalaHead() {
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
   if [[ "$1" = 3* ]]; then
+    checkHub
     # this is likely fragile and will need to be refined in the future.
     # assumptions we are making include:
     # * tag name doesn't start with `v`
