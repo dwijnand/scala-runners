@@ -31,7 +31,7 @@ checkHub()  {
 }
 curl() { checkExec curl && command curl "$@"; }
 cs()   { checkExec cs   && command cs   "$@"; }
-jq()   { checkExec cq   && command jq   "$@"; }
+jq()   { checkExec jq   && command jq   "$@"; }
 hub()  { checkHub       && command hub  "$@"; }
 
 addJava()     { vlog "[addJava] arg = '$1'";         java_args+=("--java-opt" "$1"); }
