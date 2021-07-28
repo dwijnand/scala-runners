@@ -144,6 +144,12 @@ $ scala -2.13.head
 Welcome to Scala 2.13.3-bin-2145995 (OpenJDK 64-Bit Server VM, Java 1.8.0_252).
 ```
 
+For Scala 3 you should only give the major version as in `3.next` and `3.head`:
+
+```bash
+$ scala -3.head -version
+Scala code runner version 3.0.3-RC1-bin-20210726-372930e-NIGHTLY-git-372930e -- Copyright 2002-2021, LAMP/EPFL
+```
 ### Test a Scala pull request
 
 ```bash
