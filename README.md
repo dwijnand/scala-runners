@@ -39,7 +39,7 @@ curl -sSLO https://github.com/dwijnand/scala-runners/archive/refs/heads/main.zip
 Then you can run them as `./scala ...` or move them into your `PATH`.
 
 **NOTE**: The runner requires [Coursier](https://get-coursier.io/)'s `cs` be executable and on the `PATH`,
-and various options require `hub` and `jq`.
+and various options require [`hub`](https://hub.github.com/) and [`jq`](https://stedolan.github.io/jq/).
 
 ## Example Usages
 
