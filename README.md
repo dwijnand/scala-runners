@@ -39,7 +39,7 @@ curl -sSLO https://github.com/dwijnand/scala-runners/archive/refs/heads/main.zip
 Then you can run them as `./scala ...` or move them into your `PATH`.
 
 **NOTE**: The runner requires [Coursier](https://get-coursier.io/)'s `cs` be executable and on the `PATH`,
-and various options require `hub` and `jq`.
+and various options require [`hub`](https://hub.github.com/) and [`jq`](https://stedolan.github.io/jq/).
 
 ## Example Usages
 
@@ -144,6 +144,12 @@ $ scala -2.13.head
 Welcome to Scala 2.13.3-bin-2145995 (OpenJDK 64-Bit Server VM, Java 1.8.0_252).
 ```
 
+For Scala 3 you should only give the major version as in `3.next` and `3.head`:
+
+```bash
+$ scala -3.head -version
+Scala code runner version 3.0.3-RC1-bin-20210726-372930e-NIGHTLY-git-372930e -- Copyright 2002-2021, LAMP/EPFL
+```
 ### Test a Scala pull request
 
 ```bash
