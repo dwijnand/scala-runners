@@ -18,19 +18,21 @@ declare -r scala_pr_builds_url=https://scala-ci.typesafe.com/artifactory/scala-p
 
 echoerr() { echo >&2 "$@"; }
 vlog()    { [[ -n "$verbose" ]] && echoerr "$@"; }
-die()     { echo "Aborting: $*"; exit 1; }
+die()     { echo "$*"; exit 1; }
 dropR()   { echo "${1:0:$((${#1} - $2))}"; } # https://superuser.com/q/1033273 ${1:0:-5} (bash 4.2+)
 
-checkCurl() { command -v curl &> /dev/null || die "curl command required"; }
-checkCs()   { command -v cs   &> /dev/null || die "cs command required";   }
-checkJq()   { command -v jq   &> /dev/null || die "jq command required";   }
+checkExec() { type -f "$1" &> /dev/null || die "$1 command required"; }
 checkHub()  {
-  command -v hub &> /dev/null || die "hub command required"
+  checkExec hub
   if [ ! -f "${HOME}/.config/hub" ]; then
     echo "No hub config found (at ~/.config/hub).  Triggering hub to prompt you for credentials."
     hub api
   fi
 }
+curl() { checkExec curl && command curl "$@"; }
+cs()   { checkExec cs   && command cs   "$@"; }
+jq()   { checkExec cq   && command jq   "$@"; }
+hub()  { checkHub       && command hub  "$@"; }
 
 addJava()     { vlog "[addJava] arg = '$1'";         java_args+=("--java-opt" "$1"); }
 addCoursier() { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1");              }
@@ -50,7 +52,6 @@ getScalaHead() {
   if [[ "$1" = 3* ]]; then
     echo "3+" # Using 3+ will find the latest NIGHTLY, which is the closest to Scala 2's merglies
   else
-    checkHub && checkJq
     local base_version refInfo sha
     base_version=$(getScalaBaseVersion "heads/$1")
     [ $? -ne 0 ] && die "$base_version"
@@ -65,7 +66,6 @@ getScalaHead() {
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
   if [[ "$1" = 3* ]]; then
-    checkHub && checkJq
     # this is likely fragile and will need to be refined in the future.
     # assumptions we are making include:
     # * tag name doesn't start with `v`
@@ -74,7 +74,6 @@ getScalaNext() {
     #   which is a plausible scenario, but maybe not worth accounting for? shrug, for now
     hub api "repos/lampepfl/dotty/releases?per_page=1" | jq -r .[0].tag_name
   else
-    checkCurl
     curl -Ls "https://raw.github.com/scala/community-build/$1/nightly.properties" \
       | sed -n 's/nightly=\(.*\)/\1/p'
   fi
@@ -106,16 +105,15 @@ setScalaVersion() {
         3+) scala_version=latest.stable ;; # Using "3+" makes cs pick the latest NIGHTLY
          *) scala_version="$1" ;;
   esac
-  [ $? -ne 0 ] && die "failed to set scala version given the argument '$1', cause: $scala_version"
+  [ $? -ne 0 ] && die "Failed to set scala version given the argument '$1', cause: $scala_version"
   setCoursierOptionsForSv
 }
 
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
   local base_version prInfo sha
-  checkHub && checkJq
   base_version=$(getScalaBaseVersion "pull/$1/head")
-  [ $? -ne 0 ] && die "failed to get scala base version for PR $1, cause: $base_version"
+  [ $? -ne 0 ] && die "Failed to get scala base version for PR $1, cause: $base_version"
   prInfo=$(hub api "repos/scala/scala/pulls/$1")
   [ $? -ne 0 ] && die "$prInfo"
   sha=$(jq -r '.head.sha' <<< "$prInfo")
@@ -195,7 +193,7 @@ while [[ $# -gt 0 ]]; do
            --print-scala-version) print_scala_version=1    && shift ;;
                                *) residual_args+=("$1")    && shift ;;
   esac
-  [ $? -ne 0 ] && die "error processing arg '$1'"
+  [ $? -ne 0 ] && die "Failed to process arg '$1'"
 done
 
 execRunner() {
@@ -220,17 +218,15 @@ if [[ -n "$print_scala_version" ]]; then
   case "$scala_version" in
     *.*.*) echo "$scala_version" ;;
     *)
-      checkCs && checkJq
       json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
       execRunner cs fetch -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" >/dev/null 2>&1
-      [ $? -ne 0 ] && die "error running cs fetch: exit code $?, json_file=$json_file"
+      [ $? -ne 0 ] && die "Failed to run cs fetch: exit code $?, json_file=$json_file"
       jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3
       ;;
   esac
   exit
 fi
 
-checkCs
 execRunner cs launch \
   "$app_name:$scala_version" \
   "${java_args[@]}" \
