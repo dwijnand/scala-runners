@@ -37,11 +37,11 @@ addCoursier() { vlog "[addCoursier] arg = '$1'"; coursier_args+=("$1");         
 
 getScalaBaseVersion() {
   vlog "[getScalaBaseVersion] arg = '$1'"
-  local build_sbt
+  local build_sbt base_version cross
   build_sbt=$(hub api -H "Accept: application/vnd.github.v3.raw" "repos/scala/scala/contents/build.sbt?ref=$1")
-  [ $? -ne 0 ] && exit 1
-  local base_version=$(grep -E '(baseVersion in Global|Global / baseVersion\b)' <<< "$build_sbt" | sed 's/.*"\(.*\)".*/\1/')
-  local cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
+  [ $? -ne 0 ] && die "$build_sbt"
+  base_version=$(grep -E '(baseVersion in Global|Global / baseVersion\b)' <<< "$build_sbt" | sed 's/.*"\(.*\)".*/\1/')
+  cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
   echo "$base_version$cross"
 }
 
@@ -50,12 +50,14 @@ getScalaHead() {
   if [[ "$1" = 3* ]]; then
     echo "3+" # Using 3+ will find the latest NIGHTLY, which is the closest to Scala 2's merglies
   else
-    checkJq && checkHub
-    local base_version
+    checkHub && checkJq
+    local base_version refInfo sha
     base_version=$(getScalaBaseVersion "heads/$1")
-    [ $? -ne 0 ] && exit 1
-    local refInfo=$(hub api "repos/scala/scala/git/ref/heads/$1")
-    local sha=$(jq -r '.object.sha' <<< "$refInfo")
+    [ $? -ne 0 ] && die "$base_version"
+    refInfo=$(hub api "repos/scala/scala/git/ref/heads/$1")
+    [ $? -ne 0 ] && die "$refInfo"
+    sha=$(jq -r '.object.sha' <<< "$refInfo")
+    [ $? -ne 0 ] && die "$sha"
     echo "$base_version-${sha:0:7}"
   fi
 }
@@ -63,7 +65,7 @@ getScalaHead() {
 getScalaNext() {
   vlog "[getScalaNext] arg = '$1'"
   if [[ "$1" = 3* ]]; then
-    checkHub
+    checkHub && checkJq
     # this is likely fragile and will need to be refined in the future.
     # assumptions we are making include:
     # * tag name doesn't start with `v`
@@ -104,18 +106,20 @@ setScalaVersion() {
         3+) scala_version=latest.stable ;; # Using "3+" makes cs pick the latest NIGHTLY
          *) scala_version="$1" ;;
   esac
-  [ $? -ne 0 ] && die "Failed to set scala version given arg $1"
+  [ $? -ne 0 ] && die "failed to set scala version given the argument '$1', cause: $scala_version"
   setCoursierOptionsForSv
 }
 
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
-  local base_version
-  checkJq && checkHub
+  local base_version prInfo sha
+  checkHub && checkJq
   base_version=$(getScalaBaseVersion "pull/$1/head")
-  [ $? -ne 0 ] && die "Failed to get scala base version for PR $1"
-  local prInfo=$(hub api "repos/scala/scala/pulls/$1")
-  local sha=$(jq -r '.head.sha' <<< "$prInfo")
+  [ $? -ne 0 ] && die "failed to get scala base version for PR $1, cause: $base_version"
+  prInfo=$(hub api "repos/scala/scala/pulls/$1")
+  [ $? -ne 0 ] && die "$prInfo"
+  sha=$(jq -r '.head.sha' <<< "$prInfo")
+  [ $? -ne 0 ] && die "$sha"
   setScalaVersion "$base_version-${sha:0:7}-SNAPSHOT"
 }
 
@@ -166,8 +170,7 @@ require_arg() {
   local arg="$3"
 
   if [[ -z "$arg" ]] || [[ "${arg:0:1}" == "-" ]]; then
-    echo "Aborting: $opt requires <$type> argument"
-    exit 1
+    die "$opt requires <$type> argument"
   fi
 }
 
@@ -192,6 +195,7 @@ while [[ $# -gt 0 ]]; do
            --print-scala-version) print_scala_version=1    && shift ;;
                                *) residual_args+=("$1")    && shift ;;
   esac
+  [ $? -ne 0 ] && die "error processing arg '$1'"
 done
 
 execRunner() {
@@ -216,9 +220,10 @@ if [[ -n "$print_scala_version" ]]; then
   case "$scala_version" in
     *.*.*) echo "$scala_version" ;;
     *)
-      checkJq && checkCs
+      checkCs && checkJq
       json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
       execRunner cs fetch -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" >/dev/null 2>&1
+      [ $? -ne 0 ] && die "error running cs fetch: exit code $?, json_file=$json_file"
       jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3
       ;;
   esac
