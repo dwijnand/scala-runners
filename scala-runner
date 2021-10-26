@@ -95,7 +95,7 @@ setScalaVersion() {
   vlog "[setScalaVersion] arg = '$1'"
   [[ "$1" = 3* ]] && case "$app_name" in
       scalac) app_name="scala3-compiler"   ;;
-       scala) app_name="scala3-repl"       ;;
+       scala) app_name="scala3"            ;;
     scaladoc) app_name="scala3-doc"        ;;
       scalap) app_name="scala3-decompiler" ;;
   esac
