@@ -88,6 +88,7 @@ setCoursierOptionsForSv() {
   case "$scala_version" in
     *-SNAPSHOT) addCoursier "--ttl=24h" ;;
     *+)         addCoursier "--ttl=24h" ;;
+    latest.*)   addCoursier "--ttl=24h" ;; # latest.stable, latest.release, latest.integration
   esac
 }
 
