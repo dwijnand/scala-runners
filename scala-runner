@@ -41,7 +41,7 @@ getScalaBaseVersion() {
   vlog "[getScalaBaseVersion] arg = '$1'"
   local build_sbt base_version cross
   build_sbt=$(hub api -H "Accept: application/vnd.github.v3.raw" "repos/scala/scala/contents/build.sbt?ref=$1")
-  [ $? -ne 0 ] && die "$build_sbt"
+  [ $? -eq 0 ] || die "$build_sbt"
   base_version=$(grep -E '(baseVersion in Global|Global / baseVersion\b)' <<< "$build_sbt" | sed 's/.*"\(.*\)".*/\1/')
   cross=$(grep -q -E '\d+\.\d+.0' <<< "$base_version" && echo "-pre" || echo "-bin")
   echo "$base_version$cross"
@@ -54,11 +54,11 @@ getScalaHead() {
   else
     local base_version refInfo sha
     base_version=$(getScalaBaseVersion "heads/$1")
-    [ $? -ne 0 ] && die "$base_version"
+    [ $? -eq 0 ] || die "$base_version"
     refInfo=$(hub api "repos/scala/scala/git/ref/heads/$1")
-    [ $? -ne 0 ] && die "$refInfo"
+    [ $? -eq 0 ] || die "$refInfo"
     sha=$(jq -r '.object.sha' <<< "$refInfo")
-    [ $? -ne 0 ] && die "$sha"
+    [ $? -eq 0 ] || die "$sha"
     echo "$base_version-${sha:0:7}"
   fi
 }
@@ -106,18 +106,18 @@ setScalaVersion() {
         3+) scala_version=latest.stable ;; # Using "3+" makes cs pick the latest NIGHTLY
          *) scala_version="$1" ;;
   esac
-  [ $? -ne 0 ] && die "Failed to set scala version given the argument '$1', cause: $scala_version"
+  [ $? -eq 0 ] || die "Failed to set scala version given the argument '$1', cause: $scala_version"
 }
 
 setScalaPrVersion() {
   vlog "[setScalaPrVersion] arg = '$1'"
   local base_version prInfo sha
   base_version=$(getScalaBaseVersion "pull/$1/head")
-  [ $? -ne 0 ] && die "Failed to get scala base version for PR $1, cause: $base_version"
+  [ $? -eq 0 ] || die "Failed to get scala base version for PR $1, cause: $base_version"
   prInfo=$(hub api "repos/scala/scala/pulls/$1")
-  [ $? -ne 0 ] && die "$prInfo"
+  [ $? -eq 0 ] || die "$prInfo"
   sha=$(jq -r '.head.sha' <<< "$prInfo")
-  [ $? -ne 0 ] && die "$sha"
+  [ $? -eq 0 ] || die "$sha"
   setScalaVersion "$base_version-${sha:0:7}-SNAPSHOT"
 }
 
@@ -193,7 +193,7 @@ while [[ $# -gt 0 ]]; do
            --print-scala-version) print_scala_version=1    && shift ;;
                                *) residual_args+=("$1")    && shift ;;
   esac
-  [ $? -ne 0 ] && die "Failed to process arg '$1'"
+  [ $? -eq 0 ] || die "Failed to process arg '$1'"
 done
 
 setCoursierOptionsForSv
@@ -222,7 +222,7 @@ if [[ -n "$print_scala_version" ]]; then
     *)
       json_file="$(mktemp -t scala-runner.cs-fetch.XXXXXX.json)"
       execRunner cs fetch -j "$json_file" "$app_name:$scala_version" "${coursier_args[@]}" >/dev/null 2>&1
-      [ $? -ne 0 ] && die "Failed to run cs fetch: exit code $?, json_file=$json_file"
+      [ $? -eq 0 ] || die "Failed to run cs fetch: exit code $?, json_file=$json_file"
       jq -r <"$json_file" '[.[]] | .[0] | [.[]] | .[0]' | cut -d: -f3
       ;;
   esac
