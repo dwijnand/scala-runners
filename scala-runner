@@ -107,7 +107,6 @@ setScalaVersion() {
          *) scala_version="$1" ;;
   esac
   [ $? -ne 0 ] && die "Failed to set scala version given the argument '$1', cause: $scala_version"
-  setCoursierOptionsForSv
 }
 
 setScalaPrVersion() {
@@ -196,6 +195,8 @@ while [[ $# -gt 0 ]]; do
   esac
   [ $? -ne 0 ] && die "Failed to process arg '$1'"
 done
+
+setCoursierOptionsForSv
 
 execRunner() {
   # print the arguments one to a line, quoting any containing spaces
